@@ -1,0 +1,34 @@
+name: AI PR Review (Ollama)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ai-review:
+    runs-on: [self-hosted, macOS]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: |
+          cd ai-pr-reviewer
+          npm install
+
+      - name: Run AI Reviewer
+        env:
+          OLLAMA_BASE_URL: http://localhost:11434
+          OPENAI_API_BASE_URL: http://localhost:11434/v1
+          OPENAI_API_KEY: ollama
+          MODEL_NAME: deepseek-coder-v2:16b-lite-instruct-q4_K_M
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          cd ai-pr-reviewer
+          npx ai-pr-reviewer
